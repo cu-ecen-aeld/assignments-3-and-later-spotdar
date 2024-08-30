@@ -58,7 +58,7 @@ then
 echo "deleting old files"
 make clean
 fi 
-make
+#make #commented assignment3 Part 1
 
 for i in $( seq 1 $NUMFILES)
 do

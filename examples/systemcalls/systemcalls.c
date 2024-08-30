@@ -16,8 +16,23 @@ bool do_system(const char *cmd)
  *   and return a boolean true if the system() call completed with success
  *   or false() if it returned a failure
 */
+    //check for if cmd is null
+    if(NULL == cmd)
+    {
+        return false;
+    } 
 
-    return true;
+    int retval = system(cmd);
+    /*return value -1 -> child could not be created 
+    for other non zero return there is some kind of success*/
+    if( -1 == retval)
+    {
+        return false;
+    }
+    else
+    {
+        return true;
+    }
 }
 
 /**
@@ -59,7 +74,48 @@ bool do_exec(int count, ...)
  *
 */
 
-    va_end(args);
+   
+
+    __pid_t pid;
+    pid= fork();
+    int status;
+    if(pid == -1)
+    {
+        printf("Execution of fork failed error : %s \n",strerror(errno));
+        return false;
+    }
+    if(pid == 0)
+    {
+        //this is the child do execv here
+        //printf("command is %s \n",command[0]);
+        if( -1 == execv(command[0], command))
+        {
+            printf("Execution of execv failed error : %s  command tried was %s \n",strerror(errno),command[0]); //debug only
+            exit(EXIT_FAILURE);
+        } 
+    }
+    else
+    {
+    //this is the parent, wait here for child to finish
+
+    if(waitpid(pid,&status,0) != pid) // error if non-zero return
+    {
+        printf("Execution of wait_pid failed error : %s \n",strerror(errno)); //debug only
+        return false;
+    }
+    //check WIFEXITED status
+        if(WEXITSTATUS(status) || WTERMSIG(status))
+        {
+           return false; 
+        }
+        else
+        {
+            return true;
+        }
+
+     va_end(args);   
+    }
+
 
     return true;
 }
@@ -93,7 +149,69 @@ bool do_exec_redirect(const char *outputfile, int count, ...)
  *
 */
 
-    va_end(args);
+     __pid_t pid;
+     int fd;
+     int status;
+     fd = open(outputfile,O_WRONLY | O_CREAT | O_TRUNC, 0644);
+     if(fd == -1)
+     {
+        //open failed
+        return false;
+     }
 
+
+    pid= fork();
+    if(pid == -1)
+    {
+        printf("Execution of fork failed error : %s \n",strerror(errno));
+        close(fd);
+        return false;
+    }
+    if(pid == 0)
+    {
+        //this is the child do execv here
+        //redirect to new fd here
+        if(dup2(fd,1)== -1)
+        {
+            printf("Execution of dup2 failed error : %s \n",strerror(errno)); //debug only
+            close(fd);
+            return false;
+        }
+        //we can now close old fd since new stdout will be sent to file
+        close(fd);
+        
+        if( -1 == execv(command[0], command))
+        {
+            printf("Execution of execv failed error : %s  command tried was %s \n",strerror(errno),command[0]); //debug only
+            exit(EXIT_FAILURE);
+        } 
+    }
+    else
+    {
+    //this is the parent, wait here for child to finish
+
+    if(waitpid(pid,&status,0) != pid) // error if non-zero return
+    {
+        printf("Execution of wait_pid failed error : %s \n",strerror(errno)); //debug only
+        close(fd);
+        return false;
+    }
+    //check WIFEXITED status
+    if(WIFEXITED(status))
+    {
+        if(WEXITSTATUS(status) || WTERMSIG(status))
+        {
+           close(fd);
+           return false; 
+        }
+        else
+        {
+            return true;
+        }
+    } 
+
+     va_end(args);   
+    }
+    close(fd);
     return true;
 }
