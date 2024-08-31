@@ -114,8 +114,8 @@ sudo mknod -m 600 dev/console c 5 1
 
 # # TODO: Clean and build the writer utility
 echo "RUNNING COMMAND -->clean and make finder app"
-assignments_finderapp=~/coursera_aeld/aeld_assignments/assignment-1-spotdar/finder-app
-cd ${assignments_finderapp}
+
+cd ${FINDER_APP_DIR}
 make clean #clean
 make CROSS_COMPILE=${CROSS_COMPILE}   #build
 
@@ -123,12 +123,12 @@ make CROSS_COMPILE=${CROSS_COMPILE}   #build
 # # TODO: Copy the finder related scripts and executables to the /home directory
 # # on the target rootfs
 echo "RUNNING COMMAND -->copy finder app related stuff to rootfs"
-cp -L ${assignments_finderapp}/autorun-qemu.sh -t ${OUTDIR}/rootfs/home/
-cp -L ${assignments_finderapp}/dependencies.sh -t ${OUTDIR}/rootfs/home/
-cp -L ${assignments_finderapp}/finder-test.sh -t ${OUTDIR}/rootfs/home/
-cp -L ${assignments_finderapp}/finder.sh -t ${OUTDIR}/rootfs/home/
-cp -r ${assignments_finderapp}/conf/ -t ${OUTDIR}/rootfs/home/
-cp -L ${assignments_finderapp}/writer ${OUTDIR}/rootfs/home/
+cp -L ${FINDER_APP_DIR}/autorun-qemu.sh -t ${OUTDIR}/rootfs/home/
+cp -L ${FINDER_APP_DIR}/dependencies.sh -t ${OUTDIR}/rootfs/home/
+cp -L ${FINDER_APP_DIR}/finder-test.sh -t ${OUTDIR}/rootfs/home/
+cp -L ${FINDER_APP_DIR}/finder.sh -t ${OUTDIR}/rootfs/home/
+cp -r ${FINDER_APP_DIR}/conf/ -t ${OUTDIR}/rootfs/home/
+cp -L ${FINDER_APP_DIR}/writer ${OUTDIR}/rootfs/home/
 
 # # TODO: Chown the root directory
 echo "RUNNING COMMAND -->Chown the root directory"
